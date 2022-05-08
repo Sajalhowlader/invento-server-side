@@ -25,11 +25,17 @@ async function run() {
     try {
         await client.connect()
         const productsCollection = client.db('inventoWarehouse').collection('products')
-
+        const itemsCollection = client.db('inventoWarehouse').collection('orders')
         app.get('/products', async (req, res) => {
             const cursor = productsCollection.find({})
             const result = await cursor.toArray()
             res.send(result)
+        })
+        // add new items
+        app.post('/products', async (req, res) => {
+            const updateProduct = req.body
+            const result = await productsCollection.insertOne(updateProduct);
+            res.send(result);
         })
         // update product with id
         app.get('/products/:id', async (req, res) => {
@@ -59,7 +65,19 @@ async function run() {
             const result = await productsCollection.deleteOne(query)
             res.send(result)
         })
-
+        // my items
+        app.post('/myItems', async (req, res) => {
+            const myItems = req.body
+            const result = await itemsCollection.insertOne(myItems)
+            res.send(result)
+        })
+        // show my order
+        app.get('/myItems', async (req, res) => {
+            const email = req.query.email;
+            const cursor = itemsCollection.find({ email: email })
+            const orders = await cursor.toArray()
+            res.send(orders)
+        })
 
     } finally {
 
